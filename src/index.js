@@ -1,17 +1,46 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import React from "react";
+import { render } from "react-dom";
+import { createStore } from 'redux'
+import { Provider } from 'react-redux'
+import Counter from "./components/Counter";
+import "./index.css";
 
-ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root')
+const initialState = {
+  count: 0
+}
+
+//did with if/else just because but in most cases use a switch for conciseness
+function reducer(state = initialState, action) {
+  console.log(state, action)
+  if(action.type === 'INCREMENT') {
+    return {
+      count: state.count + 1
+    }
+  }
+  else if(action.type === 'DECREMENT') {
+    return {
+      count: state.count - 1
+    }
+  }
+  else if(action.type === 'RESET') {
+    return {
+      count: 0
+    }
+  }
+  return state
+}
+
+const store = createStore(reducer)
+store.dispatch({ type: "INCREMENT" });
+store.dispatch({ type: "INCREMENT" });
+store.dispatch({ type: "DECREMENT" });
+store.dispatch({ type: "RESET" });
+
+const App = () => (
+  <Provider store={store}>
+    <Counter />
+  </Provider>
 );
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+render(<App />, document.getElementById("root"));
+

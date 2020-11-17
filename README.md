@@ -1,70 +1,118 @@
-# Getting Started with Create React App
+# Redux # 
+** notes based on this tutorial https://daveceddia.com/redux-tutorial/ **
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+```npm install --save redux react-redux```
+* redux: gives you a store to keep state in, get state out, and respond to state changes.
+* react-redux: connects redux to react components
 
-## Available Scripts
+## Store ##
+* Redux keeps the state of your app in a single store. You can extract parts of that state and plug it into components as props.
 
-In the project directory, you can run:
+* *createStore*:
+    * ```import { createStore } from 'redux'```
+    * ``` const store = createStore() ```
 
-### `yarn start`
+* Store needs a **reducer**
+    * Creating a store does not come with a default value or structure. "Redux makes zero assumptions about the shape of your state. It could be an object, or a number, or a string, or whatever you need"
+    * Because of this, we have to provide a function that will return the state.
+    * ```const store = createStore(reducer) ```
+    ```
+    function reducer(state, action) {
+            console.log('reducer', state, action);
+            return state;
+    } 
+    ```
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## Reducer ##
+* Takes the current state and an action, and returns the new state
+* Reducers reduce actions into a single state (for example, an action of incrementing a counter -> a reducer will return the new state after reducing the action with the current state)
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+* Give the reducer an **initial state**
+    * while the reducer should return a new state, it also needs to return the initial state the first time it's called.
+    * we can add a default argument to our reducer: ```state = initialState```
 
-### `yarn test`
+## Actions ##
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+*Dispatch* **actions** to change the state.
 
-### `yarn build`
+* An action is a plain object with a property called **type**.
+* Usually, a type is an uppercase plain string.
+* An action object describes a change you want to make - like increment a counter.
+* To make an action do a thing, we need to dispatch.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Dispatch ##
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+* A redux store has a built-in function called dispatch. Call it with an action, and Redux will call your reducer with that action, and then replace the state with whatever your reducer returned.
+* ```store.dispatch({type: 'INCREMENT'})```
+* Every call to dispatch results in a call to your reducer!
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+# Handling Actions #
 
-### `yarn eject`
+* To make actions do something, we need to write some code in our reducer that will inspect the incoming 'type' and do something to the state accordingly.
+* we can do if/else statements or switch statements
+```
+function reducer(state = initialState, action) {
+  console.log('reducer', state, action);
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+  switch(action.type) {
+    case 'INCREMENT':
+      return {
+        count: state.count + 1
+      };
+    case 'DECREMENT':
+      return {
+        count: state.count - 1
+      };
+    case 'RESET':
+      return {
+        count: 0
+      };
+    default:
+      return state;
+  }
+}
+```
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Keep Reducers Pure ##
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+* Reducers must be pure functions, this means that they can't modify their arguments and they can't have side effects.
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+* Don't modify the state argument. Similar to React, do not mutate the state directly in your reducer, you instead want to always return an object that reflects a reduced state based on a given action.
 
-## Learn More
+## Connecting Redux and React ##
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+* **Provider** import and wrap your app with Provider, allowing every component in the app tree to be able to access the Redux store if it wants to.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```
+import { Provider } from 'react-redux';
 
-### Code Splitting
+const App = () => (
+  <Provider store={store}>
+    <Counter/>
+  </Provider>
+);
+``` 
+* **Connect**
+```
+import { connect } from 'react-redux';
+function mapStateToProps(state) {
+  return {
+    count: state.count
+  };
+}
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+export default connect(mapStateToProps)(Counter);
+```
+* We are now exporting a connected compontent, that receives the Redux state as a prop.
 
-### Analyzing the Bundle Size
+* Connect is a higher-order function - it returns a function when you call it. It hooks into Redux, pulls out the entire state, and passes is through the mapStateToProps function - mapStateToProps needs to be a custom function because only you know the shape of the state you've stored in Redux.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+* mapStateToProps - the object you return from mapStateToProps gets fed into your component as props
 
-### Making a Progressive Web App
+## Dispatch Redux Actions in React ##
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+* Connect also passes the dispatch function from the store as props.
 
-### Advanced Configuration
+------- END OF REDUX BASICS -------
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
 
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `yarn build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
